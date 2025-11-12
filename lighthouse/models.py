@@ -14,6 +14,7 @@ from lighthouse.feature_extractor.vision_encoder import VisionEncoder
 from lighthouse.feature_extractor.text_encoder import TextEncoder
 from lighthouse.feature_extractor.audio_encoder import AudioEncoder
 
+from easydict import EasyDict
 from typing import Optional, Union, Mapping, Any, Dict, List, Tuple
 
 """
@@ -63,8 +64,9 @@ class BasePredictor:
         feature_name: str,
         slowfast_path: Optional[str] = None,
         pann_path: Optional[str] = None) -> None:
-        
-        ckpt = torch.load(ckpt_path, map_location='cpu')
+
+        with torch.serialization.safe_globals([EasyDict]):
+            ckpt = torch.load(ckpt_path, map_location='cpu', weights_only=True)
         args = ckpt['opt']
         self._clip_len: float = args.clip_length
         self._device: str = device
